@@ -75,8 +75,17 @@ jobs:
           msystem: UCRT64
           update: true
           install: git make zip mingw-w64-ucrt-x86_64-gcc
+      # -static also takes in winpthread, which MinGW otherwise leaves as a DLL that Windows lacks.
       - name: Build
-        run: make -C platform/libretro -j"$(nproc)" platform=win
+        run: LDFLAGS=-static make -C platform/libretro -j"$(nproc)" platform=win
+      - name: Check the core needs only Windows' own DLLs
+        run: |
+          imports=$(objdump -p platform/libretro/fake08_libretro.dll | sed -n 's/^\s*DLL Name: //p')
+          echo "$imports"
+          if echo "$imports" | grep -viE '^(kernel32|user32|msvcrt|ws2_32|advapi32|api-ms-win-.*)\.dll$'; then
+            echo "::error::The core needs a DLL Windows doesn't ship"
+            exit 1
+          fi
       - name: Package
         run: cd platform/libretro && zip -9 fake08_libretro-windows-x86_64.zip fake08_libretro.dll
       - uses: actions/upload-artifact@v4
