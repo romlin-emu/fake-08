@@ -1,6 +1,6 @@
-name: Romp upstream sync
+name: Romlin upstream sync
 
-# Merges upstream FAKE-08 into the romp branch each week. The push starts the core
+# Merges upstream FAKE-08 into the romlin branch each week. The push starts the core
 # release, which publishes only if the core builds.
 
 on:
@@ -11,7 +11,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: romp-sync
+  group: romlin-sync
   cancel-in-progress: false
 
 jobs:
@@ -23,10 +23,10 @@ jobs:
     steps:
       - name: Check for the sync token
         env:
-          SYNC_TOKEN: ${{ secrets.ROMP_SYNC_TOKEN }}
+          SYNC_TOKEN: ${{ secrets.ROMLIN_SYNC_TOKEN }}
         run: |
           if [ -z "$SYNC_TOKEN" ]; then
-            echo "::error::ROMP_SYNC_TOKEN is not set. Upstream changes workflow files, which the built-in token may not push."
+            echo "::error::ROMLIN_SYNC_TOKEN is not set. Upstream changes workflow files, which the built-in token may not push."
             exit 1
           fi
 
@@ -34,10 +34,10 @@ jobs:
       # workflows permission may push.
       - uses: actions/checkout@v4
         with:
-          ref: romp
+          ref: romlin
           fetch-depth: 0
           submodules: recursive
-          token: ${{ secrets.ROMP_SYNC_TOKEN }}
+          token: ${{ secrets.ROMLIN_SYNC_TOKEN }}
 
       - name: Merge upstream master
         run: |
@@ -50,4 +50,4 @@ jobs:
           fi
           git merge --no-edit FETCH_HEAD -m "Merge upstream FAKE-08"
           git submodule update --init --recursive
-          git push origin HEAD:romp
+          git push origin HEAD:romlin

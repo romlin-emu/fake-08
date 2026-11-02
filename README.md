@@ -1,5 +1,7 @@
 # fake-08
 
+This is the [Romlin](https://github.com/romlin-emu/romlin) distribution fork of [RompEmu/fake-08](https://github.com/RompEmu/fake-08), derived from [jtothebell/fake-08](https://github.com/jtothebell/fake-08). The `romlin` branch builds the FAKE-08 libretro core for macOS arm64, Linux x86_64 and Windows x86_64; download those builds from [this fork’s releases](https://github.com/romlin-emu/fake-08/releases). The original FAKE-08 name, author credits, copyrights, and [licenses](LICENSE.MD) are retained. The upstream sync workflow requires a `ROMLIN_SYNC_TOKEN` secret with repository contents and workflow write permission to push merged workflow updates. The upstream documentation follows.
+
 A Pico 8 player for homebrew consoles. Not related to or supported by Lexaloffle Software. [Latest release](https://github.com/jtothebell/fake-08/releases) includes releases for Nintendo 3DS, Nintendo Switch, Sony PS Vita, Nintendo Wii U, the Miyoo CFW for bittboy and similar consoles, and the Miyoo Mini. If you are feeling extra brave, you can also download build aftifacts from the latest CI runs in the [Actions section](https://github.com/jtothebell/fake-08/actions)
 
 # Project Goals
