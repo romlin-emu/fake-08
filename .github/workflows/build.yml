@@ -6,20 +6,15 @@ on:
   pull_request:
     branches: [ $default-branch ]
 
+permissions:
+  contents: read
+
 jobs:
   tests:
-    name: Tests
-    runs-on: ubuntu-latest
+    # Romlin pushes and PRs run this same test workflow through core validation.
+    if: github.event_name == 'push' && github.ref != 'refs/heads/romlin'
+    uses: ./.github/workflows/tests.yml
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules : recursive
-
-      - name: Build
-        run: make tests
-  
   xbox-series-libretro:
     name: Xbox Series Libretro
     runs-on: windows-latest
@@ -29,11 +24,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
           msystem: UCRT64
           update: true
@@ -42,7 +38,7 @@ jobs:
       - name: Build
         run: cd platform/libretro && make
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Xbox-Series-libretro
           path: |
@@ -54,15 +50,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir devkitpro/devkitarm /bin/bash -ex /build_dir/.github/workflows/build3ds.sh
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" devkitpro/devkitarm /bin/bash -ex /build_dir/.github/workflows/build3ds.sh
       
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Nintendo 3DS
           path: |
@@ -75,14 +72,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir devkitpro/devkita64 /bin/bash -ex /build_dir/.github/workflows/buildSwitch.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" devkitpro/devkita64 /bin/bash -ex /build_dir/.github/workflows/buildSwitch.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Nintendo Switch
           path: |
@@ -94,14 +92,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir jondbell/devkitppc-wiiu-sdl2 /bin/bash -ex /build_dir/.github/workflows/buildWiiU.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" jondbell/devkitppc-wiiu-sdl2 /bin/bash -ex /build_dir/.github/workflows/buildWiiU.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Nintendo Wii U
           path: |
@@ -113,14 +112,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir gnuton/vitasdk-docker:20220413 /bin/sh -ex /build_dir/.github/workflows/buildVita.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" gnuton/vitasdk-docker:20220413 /bin/sh -ex /build_dir/.github/workflows/buildVita.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: PS Vita
           path: |
@@ -132,14 +132,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir mcejp/arm-miyoo-linux-musleabi-gcc /bin/sh -ex /build_dir/.github/workflows/buildBittboy.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" mcejp/arm-miyoo-linux-musleabi-gcc /bin/sh -ex /build_dir/.github/workflows/buildBittboy.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Bittboy
           path: |
@@ -152,14 +153,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir jondbell/union-miyoomini-toolchain /bin/sh -ex /build_dir/.github/workflows/buildMiyooMini.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" jondbell/union-miyoomini-toolchain /bin/sh -ex /build_dir/.github/workflows/buildMiyooMini.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: MiyooMini
           path: |
@@ -171,14 +173,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir jondbell/gcw0 /bin/sh -ex /build_dir/.github/workflows/buildGcw0.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" jondbell/gcw0 /bin/sh -ex /build_dir/.github/workflows/buildGcw0.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Gcw0
           path: |
@@ -190,12 +193,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Setup NDK
-        uses: nttld/setup-ndk@v1
+        uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1
         with:
           ndk-version: r21e
 
@@ -207,7 +211,7 @@ jobs:
           cp platform/libretro/libs/arm64-v8a/libfake08.so platform/libretro/libs/libfake08-arm64.so && 
           cp platform/libretro/libs/armeabi-v7a/libfake08.so platform/libretro/libs/libfake08-arm32.so
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Android-Libretro
           path: |
@@ -221,15 +225,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir jondbell/union-miyoomini-toolchain /bin/sh -ex /build_dir/.github/workflows/buildMiyooMini-libretro.sh
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" jondbell/union-miyoomini-toolchain /bin/sh -ex /build_dir/.github/workflows/buildMiyooMini-libretro.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: MiyooMini-libretro
           path: |
@@ -243,15 +248,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir jondbell/gcw0 /bin/sh -ex /build_dir/.github/workflows/buildGcw0-libretro.sh
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" jondbell/gcw0 /bin/sh -ex /build_dir/.github/workflows/buildGcw0-libretro.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: GCW0-libretro
           path: |
@@ -264,20 +270,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          submodules : recursive
+          submodules: recursive
+          persist-credentials: false
 
       - name: CheckoutLibretro
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          persist-credentials: false
           repository: libretro/RetroArch
           path: retroarch
 
       - name: Build
         run: |
-          docker run -e ENABLE_COMPATIBILITY_REPORTING -v $GITHUB_WORKSPACE:/build_dir devkitpro/devkita64:20240324 /bin/bash -ex /build_dir/.github/workflows/buildSwitch-libretro.sh
-      - uses: actions/upload-artifact@v4
+          docker run -e ENABLE_COMPATIBILITY_REPORTING -v "$GITHUB_WORKSPACE:/build_dir" devkitpro/devkita64 /bin/bash -ex /build_dir/.github/workflows/buildSwitch-libretro.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: switch-libretro
           path: |

@@ -9,22 +9,29 @@ on:
     branches: [romlin]
     paths-ignore:
       - .github/workflows/romlin_sync.yml
+  pull_request:
+    branches: [romlin]
   workflow_dispatch:
 
 permissions: {}
 
 concurrency:
-  group: romlin-release
-  cancel-in-progress: false
+  group: romlin-release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  tests:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/tests.yml
+
   macos:
     name: macOS arm64 core
     runs-on: macos-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -32,7 +39,7 @@ jobs:
         run: make -C platform/libretro -j"$(sysctl -n hw.ncpu)" platform=osx
       - name: Package
         run: cd platform/libretro && zip -9 fake08_libretro-macos-arm64.zip fake08_libretro.dylib
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: core-macos
           path: platform/libretro/fake08_libretro-macos-arm64.zip
@@ -44,7 +51,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -52,7 +59,7 @@ jobs:
         run: make -C platform/libretro -j"$(nproc)" platform=unix
       - name: Package
         run: cd platform/libretro && zip -9 fake08_libretro-linux-x86_64.zip fake08_libretro.so
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: core-linux
           path: platform/libretro/fake08_libretro-linux-x86_64.zip
@@ -66,11 +73,11 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: recursive
           persist-credentials: false
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
           msystem: UCRT64
           update: true
@@ -88,20 +95,26 @@ jobs:
           fi
       - name: Package
         run: cd platform/libretro && zip -9 fake08_libretro-windows-x86_64.zip fake08_libretro.dll
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: core-windows
           path: platform/libretro/fake08_libretro-windows-x86_64.zip
 
   publish:
     name: Publish release
-    needs: [macos, linux, windows]
+    needs: [tests, macos, linux, windows]
+    if: >-
+      github.repository == 'romlin-emu/fake-08' &&
+      github.ref == 'refs/heads/romlin' &&
+      github.ref_name == github.event.repository.default_branch &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
+          pattern: core-*
           path: dl
           merge-multiple: true
 
@@ -117,7 +130,7 @@ jobs:
           fi
           cd dl
           for asset in *.zip; do sha256sum "$asset" > "$asset.sha256"; done
-          gh release create "$tag" *.zip *.sha256 \
+          gh release create "$tag" ./*.zip ./*.sha256 \
             --target "$GITHUB_SHA" \
             --title "FAKE-08 libretro core, ${GITHUB_SHA::10}" \
             --notes "The FAKE-08 PICO-8 libretro core for macOS arm64, Linux x86_64 and Windows x86_64, built from ${GITHUB_SHA::10} on the romlin branch." \
